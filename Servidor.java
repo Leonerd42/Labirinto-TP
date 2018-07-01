@@ -36,9 +36,9 @@ class Servidor {
             }
             if(jog[0] != null && jog[1] != null && jog[2] == null){
                 //Ação para começar o jogo... 
-                Thread t = new Thread(){
-                    int tempo = 5; 
-                    public void run(){
+                Thread t = new Thread(){        //Essa thread conta o tempo antes de começar o jogo
+                    int tempo = 5;              //para que todos os jogadores possam conectar
+                    public void run(){      
                         while(tempo > 0){
                             try {
                                 System.out.println(tempo + " segundos pra comecar o jogo!"); 
@@ -89,8 +89,9 @@ class Player extends Thread {
     }
 
     public void run (){
-        System.out.println("Classe do jogador rodando!!!"); 
+        //System.out.println("Classe do jogador rodando!!!"); 
         os.println(id); 
+        //os.println("777"); 
         while(true){
            // System.out.println("teste"); 
             if(is.hasNextLine()){
@@ -110,12 +111,12 @@ class Jogo extends Thread {
     Jogo (Player jogadores[]){
         this.jog = jogadores; 
         System.out.println("Começou"); 
+
         for(int i=0; i<4; i++){
             if(jog[i] != null){
                 //jog[i].os.println(i);
                 jog[i].start();                 
             }
-               
         }
     }
 
@@ -136,22 +137,23 @@ class Jogo extends Thread {
         System.out.println("Game over! Vencedor foi o jogador " + (vencedor + 1)); 
         for(int i=0; i<4; i++){
             if(jog[i] != null)
-                jog[i].os.println("999"); 
+                for(int j=0; j<3; j++)          //Envia 3 vezes para cada jogador
+                    jog[i].os.println("999"); 
         }
     }
 
     void IniciaJogo(){
-        jog[0].x = 30; 
-        jog[0].y = 30; 
+        jog[0].x = 0; 
+        jog[0].y = 0; 
         jog[1].x = 1200; 
         jog[1].y = 30; 
         if(jog[2] != null){
             jog[2].x = 30; 
-            jog[2].y = 650; 
+            jog[2].y = 620; 
         }
         if(jog[3] != null){
             jog[3].x = 1200; 
-            jog[3].y = 650; 
+            jog[3].y = 620; 
         }
         
         EmExecucao = true; 
@@ -175,7 +177,7 @@ class Jogo extends Thread {
                     jog[i].x -= passo; 
                 break; 
             case 666: 
-                if(jog[i].x < SCREEN_WIDTH)
+                if(jog[i].x < SCREEN_WIDTH-50)
                     jog[i].x += passo; 
                 break; 
             case 888: 
@@ -186,10 +188,10 @@ class Jogo extends Thread {
 
     }
 
-    int EndGame(){
+    int EndGame(){                  //Rotina para identificar o fim do jogo
         for(int i=0; i<4; i++){
             if(jog[i] != null){
-                if(jog[i].x >= 600 && jog[i].x <= 650 && jog[i].y >= 300 && jog[i].y <= 350){
+                if(jog[i].x+25 >= 600 && jog[i].x+25 <= 660 && jog[i].y+25 >= 300 && jog[i].y+25 <= 360){
                     EmExecucao = false;
                     return i; 
                 }                   
@@ -198,8 +200,8 @@ class Jogo extends Thread {
         return -1; 
     }
 
-    public synchronized boolean EnviaDados(){
-        
+    public synchronized boolean EnviaDados(){   //Rotina para enviar os dados de todos os jogadores
+                                                //para todos os jogadores
         for(int i=0; i<4; i++)
             if(jog[i] != null){
                 for(int j=0; j<4; j++){

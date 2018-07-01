@@ -2,14 +2,15 @@ import java.awt.*;
 import javax.sound.midi.SysexMessage;
 import javax.swing.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
 import java.util.*;
 
 class Client extends JFrame implements KeyListener{
 	
-	static int SCREEN_WIDTH = 1290; 
-    static int SCREEN_HEIGHT = 689;
+	static int SCREEN_WIDTH = 1311; 
+    static int SCREEN_HEIGHT = 745;
     StringTokenizer st = null;
     Screen screen; 
     String rec; 
@@ -23,6 +24,11 @@ class Client extends JFrame implements KeyListener{
     final int DESCE = 4; 
     final int ACAO = 5; 
     int estado = PARADO;
+    Rectangle jogador = null; 
+    public int mudanca;
+
+    //Paredes 
+    Wall par[] = new Wall[12]; 
 
     //Parte de conexão  
     Socket socket = null; 
@@ -35,16 +41,30 @@ class Client extends JFrame implements KeyListener{
     public int ax; 
     public int ay; 
 
-   //Valores para teste; 
-    int t, k;
+    void CriaParedes(){
+        //Todas as paredes do jogo
+        par[0] = new Wall(0,100,300,30);                    //Parede do jogador 1
+        par[1] = new Wall(SCREEN_WIDTH-300,100,300,30);     //Parede do jogador 2
+        par[2] = new Wall(0,SCREEN_HEIGHT-170,300,30);      //Parede do jogador 3
+        par[3] = new Wall(SCREEN_WIDTH-300,SCREEN_HEIGHT-170,300,30);   //parede do jogador 4
+        par[4] = new Wall(SCREEN_WIDTH/2-40,0,30,250);      //Paredes centrais verticais
+        par[5] = new Wall(SCREEN_WIDTH/2-40,SCREEN_HEIGHT-300,30,300);  
+        par[6] = new Wall(SCREEN_WIDTH/6,220,800,30);   //Paredes horizontais centrais
+        par[7] = new Wall(SCREEN_WIDTH/6,SCREEN_HEIGHT-300,800,30);
+        par[8] = new Wall(0,SCREEN_HEIGHT/2-40,200,30);    
+        par[9] = new Wall(SCREEN_WIDTH-200,SCREEN_HEIGHT/2-40,200,30);
+        par[10] = new Wall(SCREEN_WIDTH/2-40-SCREEN_WIDTH/8,220,30,150);
+        par[11] = new Wall(SCREEN_WIDTH/2+SCREEN_WIDTH/8,330,30,140);
+    }
 
     Client(){
         super("   Labirinto   "); 
+        CriaParedes(); 
         String ip = "127.0.0.1";       
-        screen = new Screen(); 
-        setResizable(false);        
+        screen = new Screen(par); 
+        setResizable(true);        
         add(screen); 
-        setSize(SCREEN_WIDTH,SCREEN_HEIGHT);
+        setSize(1311,745);
         setDefaultCloseOperation(EXIT_ON_CLOSE);        
         setVisible(true);
         
@@ -52,20 +72,18 @@ class Client extends JFrame implements KeyListener{
             socket = new Socket(ip, porta);            
             os = new PrintStream(socket.getOutputStream()); //Saida de dados
             is = new Scanner(socket.getInputStream());  //Entrada de dados
-            //impressão do funcionamento 
             id = Integer.parseInt(is.nextLine(),10);
-            //System.out.println("Impressão do valor do id " + status.id); 
-            //while(true) {}
-
         } catch (UnknownHostException e){
             System.err.println("Servidor desconhecido"); 
         } catch (IOException ex){
             System.err.println("Não pode se conectar ao servidor!"); 
         }
+
+        setTitle("Labirinto - Jogador "+(id+1));
+
         addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent e) {
                 estado = PARADO; 
-                //System.out.println("Key released"); 
             }
 
             public void keyPressed(KeyEvent e){
@@ -73,26 +91,21 @@ class Client extends JFrame implements KeyListener{
                     case KeyEvent.VK_W:         //Cima
                     case KeyEvent.VK_UP:
                         estado = CIMA; 
-                        //System.out.println("Subindo"); 
                         break; 
                     case KeyEvent.VK_A:         //Esquerda
                     case KeyEvent.VK_LEFT:
                         estado = ESQUERDA; 
-                        //System.out.println("Esquerda"); 
                         break;
                     case KeyEvent.VK_S:         //Baixo 
                     case KeyEvent.VK_DOWN:
                         estado = DESCE; 
-                        //System.out.println("Descendo"); 
                         break; 
                     case KeyEvent.VK_D:         //Direita
                     case KeyEvent.VK_RIGHT:
                         estado = DIREITA; 
-                        //System.out.println("Direita"); 
                         break; 
                     case KeyEvent.VK_SPACE:
                         estado = ACAO; 
-                        //System.out.println("Ação"); 
                         break; 
                 }
             }
@@ -101,51 +114,63 @@ class Client extends JFrame implements KeyListener{
         Thread enviar = new Thread(){
             public void run(){
                 String buf = new String();   
-                boolean mudanca = false;                 
+                                
                 while(true){
                     try {
                         sleep(20); 
-                    } catch (InterruptedException e) {
-                        //TODO: handle exception
-                    }
+                    } catch (InterruptedException e) {}
+
+                    //Colide(screen.jogador[id], screen.parede);
                     switch(estado){
                         case PARADO:    
+                        //if(Colide(jogador) || estado == PARADO)
                             buf = "111"; 
-                            //os.println("111");   
-                            //System.out.println("Personagem PARADO!");
                         break; 
                         case ESQUERDA:  
+                        if(!Colide(jogador) || mudanca != ESQUERDA){
                             buf = "444";    
-                            //mudanca = true;
-                        // os.println("444");   
-                            //System.out.println("Personagem andando para a ESQUERDA!");
+                            mudanca = ESQUERDA; 
+                        }
+                        else {
+                            mudanca = ESQUERDA; 
+                            buf = "111"; 
+                        }
                         break; 
                         case DIREITA:   
+                        if(!Colide(jogador) || mudanca != DIREITA){
                             buf = "666";  
-                            //mudanca = true;
-                            //os.println("666");    
-                            //System.out.println("Personagem andando para a DIREITA!");
+                            mudanca = DIREITA; 
+                        }
+                        else {
+                            mudanca = DIREITA; 
+                            buf = "111"; 
+                        }
                         break; 
                         case CIMA:     
+                        if(!Colide(jogador) || mudanca != CIMA){
                             buf = "888"; 
-                            //mudanca = true;
-                            //os.println("888");   
-                            //System.out.println("Personagem andando para CIMA!");
+                            mudanca = CIMA; 
+                        }
+                        else {
+                            buf = "111"; 
+                            mudanca = CIMA; 
+                        }
                         break; 
-                        case DESCE:     
+                        case DESCE:  
+                        if(!Colide(jogador) || mudanca != DESCE)   {
                             buf = "222"; 
-                            //mudanca = true;
-                            //os.println("222");
-                            //System.out.println("Personagem andando para BAIXO!");
+                            mudanca = DESCE; 
+                        }
+                        else {
+                            buf = "111"; 
+                            mudanca = DESCE; 
+                        }
                         break; 
                         case ACAO:   
                             buf = "555"; 
-                            //mudanca = true;
-                            //os.println("555");  
-                            //System.out.println("Personagem APERTANDO UM BOTÃO!");
                         break; 
                     }
-                    if(estado != PARADO)
+                    //if(estado != PARADO)
                         os.println(buf); 
                 } 
             }
@@ -155,27 +180,22 @@ class Client extends JFrame implements KeyListener{
         
         Thread receber = new Thread(){
             String ident, posx, posy; 
-            String[] teste ; 
+            String[] teste; 
             public void run(){
                 while(true){
-                //if(is.hasNextLine()){
-
-                    ident = is.nextLine(); 
-                    posx = is.nextLine(); 
-                    posy = is.nextLine(); 
-
-                    //System.out.println(ident + " " + posx + " " + posy); 
-
-                    aid = Integer.parseInt(ident); 
-                    ax = Integer.parseInt(posx); 
-                    ay = Integer.parseInt(posy); 
+                    if(is.hasNextLine()){
+                        ident = is.nextLine(); 
+                        posx = is.nextLine(); 
+                        posy = is.nextLine(); 
+                        aid = Integer.parseInt(ident); 
+                        ax = Integer.parseInt(posx); 
+                        ay = Integer.parseInt(posy); 
+                    }
 
                     if(aid == 999 || ax == 999 || ay == 999)
                         EndGame(); 
 
                     AtualizaTela(aid, ax, ay);
-                          
-                 //}
                     screen.repaint();
                 }
 
@@ -185,7 +205,16 @@ class Client extends JFrame implements KeyListener{
     }
 
     void EndGame(){
-        //screen.FimMensagem(g);
+        screen.EndGame();
+    }
+
+    boolean Colide(Rectangle i1){
+        i1 = new Rectangle(screen.posX[id],screen.posY[id],50,50); 
+        for(int i=0; i<12; i++){
+            if(i1.intersects(par[i].par))
+                return true;
+        }
+        return false; 
     }
 
     void AtualizaTela(int id, int x, int y){
@@ -193,14 +222,6 @@ class Client extends JFrame implements KeyListener{
         screen.posY[id] = y;         
     }
 
-    int getValue(String texto){
-        return Integer.parseInt(texto); 
-    }
-   
-    /*@Override
-    public void run() {
-        
-    }*/
 
     @Override
     public void keyReleased(KeyEvent e) {
