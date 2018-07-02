@@ -70,7 +70,7 @@ class Client extends JFrame implements KeyListener{
         CriaParedes(); 
         String ip = "127.0.0.1";       
         screen = new Screen(par); 
-        setResizable(true);        
+        setResizable(false);        
         add(screen); 
         setSize(1311,745);
         setDefaultCloseOperation(EXIT_ON_CLOSE);        
@@ -241,6 +241,7 @@ class Client extends JFrame implements KeyListener{
         if(j1.intersects(botao[id].par) && estado == ACAO){
             //alteração das paredes
             screen.Botoes(id);
+            screen.Portas(id);
         }else screen.ZeraBotao(id); 
     }
 

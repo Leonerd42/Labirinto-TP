@@ -45,6 +45,8 @@ public class Screen extends JPanel {
             fundo = ImageIO.read(new File(pathname)); 
             for(int i=0; i<12; i++)
                 parede[i] = ImageIO.read(new File("imgs/parede.jpg")); 
+            for(int i=0; i<4; i++)
+                portas[i] = ImageIO.read(new File("imgs/preto.png")); 
             botao[0] = ImageIO.read(new File("imgs/not-pressed.png")); 
             botao[1] = ImageIO.read(new File("imgs/pressed.png")); 
             centro = ImageIO.read(new File("imgs/stairs.png")); 
@@ -95,16 +97,16 @@ public class Screen extends JPanel {
             g.drawImage(botao[0],SCREEN_WIDTH/2,SCREEN_HEIGHT-250,50,50,this); 
         else g.drawImage(botao[1],SCREEN_WIDTH/2,SCREEN_HEIGHT-250,50,50,this); 
         if(p1 == true){
-
+            g.drawImage(portas[0],SCREEN_WIDTH/8,220,100,30,this); 
         }
         if(p2 == true){
-            
+            g.drawImage(portas[1],SCREEN_WIDTH/8,SCREEN_HEIGHT-300,100,30,this); 
         }
         if(p3 == true){
-            
+            g.drawImage(portas[2],SCREEN_WIDTH-2*SCREEN_WIDTH/8,SCREEN_HEIGHT-300,100,30,this); 
         }
         if(p4 == true){
-            
+            g.drawImage(portas[3],SCREEN_WIDTH-2*SCREEN_WIDTH/8,220,100,30,this); 
         }
         g.drawImage(jogador[0], posX[0], posY[0], 50, 50, this);
         g.drawImage(jogador[1], posX[1], posY[1], 50, 50, this);
@@ -155,6 +157,25 @@ public class Screen extends JPanel {
                 break; 
             case 3:
                 b4 = false; 
+                break; 
+        }
+    }
+
+    void Portas(int i){
+        switch(i){
+            case 0: 
+            case 2:
+                p1 = false; 
+                p2 = true; 
+                p3 = false; 
+                p4 = true; 
+                break; 
+            case 1:
+            case 3: 
+                p1 = true; 
+                p2 = false; 
+                p3 = true; 
+                p4 = false; 
                 break; 
         }
     }

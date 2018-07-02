@@ -183,7 +183,7 @@ class Jogo extends Thread {
                     jog[i].y -= passo; 
                 break;
             case 555: 
-                //if()
+                //
                 break;  
         }
 
