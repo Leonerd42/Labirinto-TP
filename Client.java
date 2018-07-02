@@ -29,6 +29,7 @@ class Client extends JFrame implements KeyListener{
 
     //Paredes 
     Wall par[] = new Wall[12]; 
+    Wall botao[] = new Wall[4]; 
 
     //Parte de conexão  
     Socket socket = null; 
@@ -55,6 +56,13 @@ class Client extends JFrame implements KeyListener{
         par[9] = new Wall(SCREEN_WIDTH-200,SCREEN_HEIGHT/2-40,200,30);
         par[10] = new Wall(SCREEN_WIDTH/2-40-SCREEN_WIDTH/8,220,30,150);
         par[11] = new Wall(SCREEN_WIDTH/2+SCREEN_WIDTH/8,330,30,140);
+
+        //Criação dos botoes 
+        botao[0] = new Wall(SCREEN_WIDTH/2-100,150,50,50);
+        botao[1] = new Wall(SCREEN_WIDTH/2,150,50,50);
+        botao[2] = new Wall(SCREEN_WIDTH/2-100,SCREEN_HEIGHT-250,50,50);
+        botao[3] = new Wall(SCREEN_WIDTH/2,SCREEN_HEIGHT-250,50,50);
+
     }
 
     Client(){
@@ -195,6 +203,7 @@ class Client extends JFrame implements KeyListener{
                     if(aid == 999 || ax == 999 || ay == 999)
                         EndGame(); 
 
+                    MudaBotoes(jogador);
                     AtualizaTela(aid, ax, ay);
                     screen.repaint();
                 }
@@ -217,11 +226,28 @@ class Client extends JFrame implements KeyListener{
         return false; 
     }
 
+    void MudaBotoes(Rectangle j1){/*
+        Rectangle v[] = new Rectangle[4]; 
+        for(int i=0; i<4; i++)
+            v[i] = new Rectangle(screen.posX[i],screen.posY[i],50,50); 
+        for(int i=0; i<4; i++){
+            for(int j=0; j<4; j++){
+                if(v[i].intersects(botao[j].par)){
+                    screen.Botoes(j);
+                }//else screen.ZeraBotao(j); 
+            }
+        }*/
+        j1 = new Rectangle(screen.posX[id],screen.posY[id],50,50); 
+        if(j1.intersects(botao[id].par) && estado == ACAO){
+            //alteração das paredes
+            screen.Botoes(id);
+        }else screen.ZeraBotao(id); 
+    }
+
     void AtualizaTela(int id, int x, int y){
         screen.posX[id] = x; 
         screen.posY[id] = y;         
     }
-
 
     @Override
     public void keyReleased(KeyEvent e) {

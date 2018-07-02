@@ -129,9 +129,7 @@ class Jogo extends Thread {
             //AtualizaDados();
             try {
                 sleep(8);
-            } catch (InterruptedException e) {
-                //TODO: handle exception
-            } 
+            } catch (InterruptedException e) {} 
         }while(EnviaDados() && EmExecucao); 
 
         System.out.println("Game over! Vencedor foi o jogador " + (vencedor + 1)); 
@@ -183,7 +181,10 @@ class Jogo extends Thread {
             case 888: 
                 if(jog[i].y > 0)
                     jog[i].y -= passo; 
-                break; 
+                break;
+            case 555: 
+                //if()
+                break;  
         }
 
     }
